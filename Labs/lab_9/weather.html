@@ -1,0 +1,295 @@
+<!-- Home Page -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>Weather Information</title>
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+	<style>
+		#thermometer_inner { width: 95%; height: 20%; margin:2.5%; background: red; position:absolute; bottom:0;}
+		#thermometer_outer {height:400px; position:relative;}
+		#temp_today { color:white; text-align:center; position:relative; top:50%; }
+	</style>
+  </head>
+  <body>
+  	<div class="container">
+		<br>
+		<h1 style="text-align:center">Weather Forecast</h1>
+		<hr>
+
+		<!-- Start of Extra Credit -->
+		<div class="form-row">
+			<div class="form-group col-4"></div>
+			<div class="form-group col">
+				<h5>Latitude</h5>
+				<input type="text" class="form form-control" name="latitude" id="latitude" placeholder="Enter latitude">
+			</div>
+			<div class="form-group col-4"></div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-4"></div>	
+			<div class="form-group col">
+				<h5>Longitude</h5>
+				<input type="text" class="form form-control" name="longitude" id="longitude" placeholder="Enter longitude">
+			</div>
+			<div class="form-group col-4"></div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-4"></div>
+			<div class="form-group col">
+					<button type="submit" id="weatherCheck" class="btn btn-block btn-primary">Check Weather</button>
+			</div>
+			<div class="form-group col-4"></div>
+		</div>
+		<br>
+		<!-- End of Extra Credit -->
+
+		<div class="row">
+			<div class="col-4">
+				<div class="card" >
+					<div id="thermometer_outer">
+						<div id="thermometer_inner"><p id="temp_today" class="h3"> 0 F</p></div>
+					</div>
+					<div class="card-body">
+					    <h5 class="text-center">Thermometer</h5>
+					</div>
+				</div>
+			</div>
+			<div class="col-4">
+				<div class="card" style="height:100%;">
+					<div class="my-auto">
+						<!-- source for images: https://www.iconfinder.com/iconsets/weather-line-19 -->
+						<img id="image_today" class="img-fluid" src="img/clear-day.png" alt="Today's Weather Icon">
+						<p id="icon_today" class="h3" style="text-align:center">Icon</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-4">
+				<div class="card " style="height:100%;">
+					<div class="my-auto">
+						<p class="h3" style="padding-left:15px;">Precipitation: <span id="precip_today">10%</span><br>
+					    Humidity: <span id="humidity_today">80%</span><br>
+					    Wind Speed: <span id="wind_today">5</span> mph<br>
+					    Summary: <span id="summary_today">Summary Info</span></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br>
+		<h2 class="h1" style="text-align:center;">6 Day Forecast</h2>
+		<hr>
+		<div class="row" id="6_day_forecast">
+			
+		</div>
+		<br>
+	</div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+	<script>
+		$(document).ready(function() {
+
+			var latitude = document.getElementById('latitude');
+			var longitude = document.getElementById('longitude');
+
+			var url ='https://api.darksky.net/forecast/e6e7c6202bac6b224d2011e05e92b973/40.0150,-122.4233'; //Place your DarkSky API Call Here 
+			$.ajax({url:url, dataType:"jsonp"}).then(function(data) {
+				
+				console.log(data);//Review all of the data returned
+				console.log("Current Temp: " + data.currently.apparentTemperature);//View Today's Temp
+				console.log("Tomorrow's High: " + data.daily.data[1].apparentTemperatureHigh);//View Tomorrow's High
+				var unix_time = data.currently.time;//Retrieve the current timestamp
+				var javascript_time = new Date(unix_time * 1000);//Convert the unix time stamp to javascript
+				console.log(javascript_time);
+				console.log(javascript_time.getDay());
+
+				/* 
+					Read the current weather information from the data point values [https://darksky.net/dev/docs#data-point] to 
+					update the webpage for today's weather:
+					1. image_today : This should display an image for today's weather.  
+									 This will use the icon data point and pair it with an appropriate .png file (located in the img directory.)
+
+					2. icon_today : This will be set to display the current icon value.
+
+					3. temp_today : This will be updated to match the current temperature.
+
+					4. thermometer_inner : Modify the height of the thermometer to match the current temperature. This means if the 
+										   current temperature is 32 F, then the thermometer will have a height of 32%.  Please note, 
+										   this thermometer has a lower boundary of 0 and upper boundary of 100.  
+
+					5. precip_today : This will be updated to match the current probability for precipitation.(make sure this is 
+									  listed as a percentage %)
+
+					6. humidity_today : This will be updated to match the current humidity percentage (make sure this is listed as a 
+										percentage %)
+
+					7. wind_today : This will be updated to match the current wind speed.
+
+					8. summary_today: This will be updated to match the current summary for the day's weather.
+
+				*/
+				
+				// Retrieve all Data from DarkSky
+				var currentWeather = data.currently.icon;
+				var currentTemp = data.currently.apparentTemperature;
+				var probPrecip = data.currently.precipProbability;
+				var currentHumidity = data.currently.humidity;
+				var currentWindSpeed = data.currently.windSpeed;
+				var currentSummary = data.currently.summary;
+
+
+				// image_today
+				var image_today = document.getElementById("image_today");
+				image_today.setAttribute('src',"img/" + currentWeather + ".png");
+
+				// icon_today
+				var icon_today = document.getElementById("icon_today");
+				icon_today.innerHTML = currentWeather;
+				
+				// temp_today
+				var temp_today = document.getElementById("temp_today");
+				temp_today.innerHTML = currentTemp + " F";
+
+				// thermometer_inner
+				var inner_therm = document.getElementById("thermometer_inner");
+				if(currentTemp < 65){
+					inner_therm.setAttribute('style','background: blue');
+					if(currentTemp < 0){
+						inner_therm.setAttribute('style','height: ' + 0 + '%');
+					}
+					else{
+						inner_therm.setAttribute('style','height: ' + currentTemp + '%');
+					}
+				}
+				else if(currentTemp > 85){
+					inner_therm.setAttribute('style','background: red');
+					if(currentTemp > 100){
+						inner_therm.setAttribute('style','height: ' + 100 + '%');
+					}
+					else{
+						inner_therm.setAttribute('style','height: ' + currentTemp + '%');
+					}
+				}
+				else{	
+					inner_therm.setAttribute('style','background: grey');
+					inner_therm.setAttribute('style','height: ' + currentTemp + '%');
+				}
+	
+				// precip_today
+				var precip_today = document.getElementById("precip_today");
+				precip_today.innerHTML = probPrecip*100 + "%";
+
+				// humidity_today
+				var humidity_today = document.getElementById("humidity_today");
+				humidity_today.innerHTML = currentHumidity*100 + "%";
+
+				// wind_today
+				var wind_today = document.getElementById("wind_today");
+				wind_today.innerHTML = currentWindSpeed;
+
+				// summary_today
+				var summary_today = document.getElementById("summary_today");
+				summary_today.innerHTML = currentSummary;
+
+				/* Process the daily forecast for the next 6 days */
+				/*
+					For the next 6 days you'll need to add a new card listing:
+						1. The image icon for the day's weather
+						2. The temperature high
+						3. The temperature low
+
+					Each card should use the following format:
+					<div class="col-2">
+						<div class="card">
+							<img class="card-img-top" src="<!-- List Icon for the Day's Weather -->" alt="Card image cap">
+							<div class="card-body">
+								<h5 class="card-title"><!-- List Day of the Week Here --></h5>
+								<p class="card-text">High:<!--List Temperature High --> <br> 
+									Low: <!-- List Temperature Low --></p>
+							</div>
+						</div>
+					</div>
+
+					<Hint/Note> - Make sure to use string concatenation to add the html code for the daily weather cards.  This should
+					be set to the innerHTML for the 6_day_forecast.
+
+				*/
+				var week_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; //This is a helper array to help convert the day of the week [0-7] to a named value [Sunday - Saturday]
+				
+				var weekly_forecast = document.getElementById("6_day_forecast");
+
+				var i=1;
+				for(i; i<7; i++){
+
+					// Current day
+					var currDay = data.daily.data[i];
+
+					// Retrieve data on the current day
+					var unix_time = currDay.time;
+					var js_time = new Date(unix_time*1000);
+					var dayIndex = js_time.getDay();
+
+					// Create new column for a given day
+					var newDay = document.createElement('div');
+					newDay.setAttribute('class','col-2');
+
+						// Create new card for the given day
+						var newCard = document.createElement('div');
+						newCard.setAttribute('class','card');
+
+							// Card image
+							var image = document.createElement('img');
+							image.setAttribute('class','card-img-top');
+							image.setAttribute('src',"img/" + currDay.icon + ".png")
+
+							// Card body
+							var body = document.createElement('div');
+							body.setAttribute('class','card-body');
+
+								// Card title
+								var title = document.createElement('h5');
+								title.setAttribute('class','card-title');
+								title.innerHTML = week_names[dayIndex];
+
+								// Card text
+								var text = document.createElement('p');
+								text.setAttribute('class','card-text');
+
+									// High
+									var high = document.createElement('text');
+									high.innerHTML = "High: " + currDay.temperatureHigh;
+
+									// Line break
+									var linebreak = document.createElement('br');
+
+									// Low
+									var low = document.createElement('text');
+									low.innerHTML = "Low: " + currDay.temperatureLow;
+
+									// Append the high, line break, and low
+									text.appendChild(high);
+									text.appendChild(linebreak);
+									text.appendChild(low);
+
+								// Append the title and text to the body
+								body.appendChild(title);
+								body.appendChild(text);
+
+							// Append the image and body to the card
+							newCard.appendChild(image);
+							newCard.appendChild(body);
+
+						// Append the card to the column
+						newDay.appendChild(newCard);
+					
+					// Append the current day tot he 6 day forecast
+					weekly_forecast.appendChild(newDay);
+				}
+			})
+		})
+ 	</script>
+</body>
+</html>
